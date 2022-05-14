@@ -27,6 +27,10 @@
 - `<Suspense>`로 lazy 컴포넌트 로드
 - page path key값으로 페이지 변경시 `CSSTransition` transion 동작
 
+<br />
+
+#### lazy load page
+
 ```jsx
 const DynamicComponent = ({path}) => {
   const Component = lazy(() => import(`../pages${path}`));
@@ -46,3 +50,35 @@ const DynamicComponent = ({path}) => {
   );
 };
 ```
+
+<br />
+
+#### dynamic import layer
+
+```jsx
+const DynamicImportComponent = ({path, isOpen = false}) => {
+  const [Component, setComponent] = useState(null);
+
+  useEffect(() => {
+    const importComponent = async () => {
+        const {default: Component} = await import(`../layer${path}`);
+        setComponent(() => Component);
+    };
+    isOpen && importComponent();
+  }, [isOpen]);
+
+  return (
+    <CSSTransition
+      in={isOpen && !!Component}
+      timeout={500}
+      classNames="alert"
+      unmountOnExit
+      onExited={() => setComponent(null)}
+    >
+      {Component ? createElement(Component) : <></>}
+    </CSSTransition>
+  );
+};
+```
+
+
